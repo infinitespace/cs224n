@@ -1,11 +1,18 @@
-First, follow the PA1 instruction to setup environment.
+# First, follow the PA1 instruction to setup environment.
 
 source setup.sh
 
-To modify My features, just play with 
+# for the very first time to run
+sh run.sh new
+
+# To modify My features, just play with 
 
 vi ./java/src/cs224n/MyFeaturizer.java
 
-To rebuild and train the system to get a new BLEU, just run
+# To rebuild and train the system to get a new BLEU, just run
 
-sh run.sh
+sh run.sh re
+
+# To show recent result, just run
+
+sh run.sh n
