@@ -1,5 +1,6 @@
 ##### First, setup environment
 cp -r /afs/ir/class/cs224n/cs224n-pa/pa1-mt .
+
 source setup.sh
 
 ##### for the very first time to run
