@@ -26,7 +26,9 @@ public class TreeAnnotations {
 		// TODO : mark nodes with the label of their parent nodes, giving a second
 		// order vertical markov process
 
-		return VerticalMarkovTree(unAnnotatedTree);
+		Tree<String> vmtree = VerticalMarkovTree(unAnnotatedTree);
+
+		return binarizeTree(vmtree);
 
 	}
 
@@ -34,31 +36,37 @@ public class TreeAnnotations {
 		String label = tree.getLabel();
 		if (tree.isLeaf())
 			return new Tree<String>(label);
+
 		if (tree.getChildren().size() == 1) {
 			return new Tree<String>
 			(label, 
-					Collections.singletonList(VerticalMarkovTree(tree.getChildren().get(0))));
+			 Collections.singletonList(VerticalMarkovTree(tree.getChildren().get(0))));
 		}
+
 		// otherwise, it's a binary-or-more local tree, 
 		// so decompose it into a sequence of binary and unary trees.
-		String intermediateLabel = "@"+label+"->";
-		Tree<String> intermediateTree = VerticalMarkovTreeHelper(tree, 0, intermediateLabel);
-		return new Tree<String>(label, intermediateTree.getChildren());
-	}
-
-	private static Tree<String> VerticalMarkovTreeHelper(Tree<String> tree,
-			int numChildrenGenerated, 
-			String intermediateLabel) {
-		Tree<String> leftTree = tree.getChildren().get(numChildrenGenerated);
-		List<Tree<String>> children = new ArrayList<Tree<String>>();
-		children.add(VerticalMarkovTree(leftTree));
-		if (numChildrenGenerated < tree.getChildren().size() - 1) {
-			Tree<String> rightTree = VerticalMarkovTreeHelper(tree, numChildrenGenerated + 1, 
-							intermediateLabel + "_" + leftTree.getLabel());
-			children.add(rightTree);
+		String parent;
+		int del = label.indexOf("^");
+		if(del > -1){
+			parent = label.substring(0, del);
+			// System.out.print("ysp" + Integer.toString(del) + parent + ' ');
 		}
-		return new Tree<String>(intermediateLabel, children);
-	} 
+		else{
+			parent = label;
+			// System.out.print("nop" + parent + ' ');
+		}
+		// System.out.print(label + '=' + parent + '=');
+
+		List<Tree<String>> newchildren = new ArrayList<Tree<String>>();
+		for(int i =0; i<tree.getChildren().size(); ++i){
+			String childname = tree.getChildren().get(i).getLabel() + "^" + parent;
+			tree.getChildren().get(i).setLabel(childname);
+			newchildren.add(VerticalMarkovTree(tree.getChildren().get(i)));
+			// System.out.print(childname + ' ');
+		}
+		// System.out.print('\n');
+		return new Tree<String>(label, newchildren);
+	}
 
 	private static Tree<String> binarizeTree(Tree<String> tree) {
 		String label = tree.getLabel();

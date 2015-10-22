@@ -30,6 +30,7 @@ public class PCFGParserTester {
 			Tree<String> guessedTree = parser.getBestParse(testSentence);
 			System.out.println("Guess:\n"+Trees.PennTreeRenderer.render(guessedTree));
 			System.out.println("Gold:\n"+Trees.PennTreeRenderer.render(testTree));
+			System.out.print('.');
 			eval.evaluate(guessedTree, testTree);
 		}
 		eval.display(true);

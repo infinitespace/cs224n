@@ -15,9 +15,10 @@ public class PCFGParser implements Parser {
         // binarize training trees
         List<Tree<String>> binarizedTrees = new LinkedList<Tree<String>>();
         for (Tree<String> tree : trainTrees) {
-            System.out.println("Origin:\n"+Trees.PennTreeRenderer.render(tree));
-            binarizedTrees.add(TreeAnnotations.annotateTree(tree));
-            System.out.println("Binarized:\n"+Trees.PennTreeRenderer.render(TreeAnnotations.annotateTree(tree)));
+            // System.out.println("Origin:\n"+Trees.PennTreeRenderer.render(tree));
+            Tree<String> tmp = TreeAnnotations.annotateTree(tree);
+            binarizedTrees.add(tmp);
+            // System.out.println("Binarized:\n"+Trees.PennTreeRenderer.render(tmp));
         }
         lexicon = new Lexicon(binarizedTrees);
         grammar = new Grammar(binarizedTrees);
