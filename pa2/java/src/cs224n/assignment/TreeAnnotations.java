@@ -26,9 +26,39 @@ public class TreeAnnotations {
 		// TODO : mark nodes with the label of their parent nodes, giving a second
 		// order vertical markov process
 
-		return binarizeTree(unAnnotatedTree);
+		return VerticalMarkovTree(unAnnotatedTree);
 
 	}
+
+	private static Tree<String> VerticalMarkovTree(Tree<String> tree) {
+		String label = tree.getLabel();
+		if (tree.isLeaf())
+			return new Tree<String>(label);
+		if (tree.getChildren().size() == 1) {
+			return new Tree<String>
+			(label, 
+					Collections.singletonList(VerticalMarkovTree(tree.getChildren().get(0))));
+		}
+		// otherwise, it's a binary-or-more local tree, 
+		// so decompose it into a sequence of binary and unary trees.
+		String intermediateLabel = "@"+label+"->";
+		Tree<String> intermediateTree = VerticalMarkovTreeHelper(tree, 0, intermediateLabel);
+		return new Tree<String>(label, intermediateTree.getChildren());
+	}
+
+	private static Tree<String> VerticalMarkovTreeHelper(Tree<String> tree,
+			int numChildrenGenerated, 
+			String intermediateLabel) {
+		Tree<String> leftTree = tree.getChildren().get(numChildrenGenerated);
+		List<Tree<String>> children = new ArrayList<Tree<String>>();
+		children.add(VerticalMarkovTree(leftTree));
+		if (numChildrenGenerated < tree.getChildren().size() - 1) {
+			Tree<String> rightTree = VerticalMarkovTreeHelper(tree, numChildrenGenerated + 1, 
+							intermediateLabel + "_" + leftTree.getLabel());
+			children.add(rightTree);
+		}
+		return new Tree<String>(intermediateLabel, children);
+	} 
 
 	private static Tree<String> binarizeTree(Tree<String> tree) {
 		String label = tree.getLabel();
