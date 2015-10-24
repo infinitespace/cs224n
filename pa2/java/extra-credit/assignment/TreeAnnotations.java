@@ -25,8 +25,8 @@ public class TreeAnnotations {
 
 		// TODO : mark nodes with the label of their parent nodes, giving a second
 		// order vertical markov process
-		Tree<String> tree = VerticalMarkovTreeSecond(unAnnotatedTree);
-		return binarizeTree(tree);
+		Tree<String> tree = VerticalMarkovTreeThird(unAnnotatedTree);
+		return binarizeTreeHorizontalOne(tree);
 	}
 
 
