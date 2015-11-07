@@ -30,15 +30,18 @@ public class BaselineCoreferenceSystem implements CoreferenceSystem{
       List<Entity> clusters = pair.getSecond();
       List<Mention> mentions = doc.getMentions();
       //--Print the Document
-//      System.out.println(doc.prettyPrint(clusters));
+      // System.out.println("============ doc ==============");
+      // System.out.println(doc.prettyPrint(clusters));
+      System.out.println("========== mentions ===========");
       //--Iterate over mentions
       for(Mention m : mentions){
-//        System.out.println(m);
+       System.out.println(m);
       }
+      // System.out.println("======== mention pairs ========");
       //--Iterate Over Coreferent Mention Pairs
       for(Entity e : clusters){
         for(Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()){
-//          System.out.println(""+mentionPair.getFirst() + " and " + mentionPair.getSecond() + " are coreferent");
+         // System.out.println(""+mentionPair.getFirst() + " and " + mentionPair.getSecond() + " are coreferent");
         }
       }
     }
@@ -57,6 +60,8 @@ public class BaselineCoreferenceSystem implements CoreferenceSystem{
     for(Mention m : doc.getMentions()){
       //(...get its text)
       String mentionString = m.gloss();
+      // System.out.println("Mention String:");
+      // System.out.println(mentionString);
       //(...if we've seen this text before...)
       if(clusters.containsKey(mentionString)){
         //(...add it to the cluster)
@@ -65,7 +70,7 @@ public class BaselineCoreferenceSystem implements CoreferenceSystem{
         //(...else create a new singleton cluster)
         ClusteredMention newCluster = m.markSingleton();
         mentions.add(newCluster);
-        clusters.put(mentionString,newCluster.entity);
+        clusters.put(mentionString, newCluster.entity);
       }
     }
     //(return the mentions)
