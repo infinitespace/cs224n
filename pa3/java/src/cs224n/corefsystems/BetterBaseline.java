@@ -40,27 +40,45 @@ public class BetterBaseline implements CoreferenceSystem {
 	@Override
 	public List<ClusteredMention> runCoreference(Document doc) {
 
-    	ArrayList<ClusteredMention> mentions = new ArrayList<ClusteredMention>();
-        HashMap<String, Entity> token2Entity = new HashMap<String, Entity>();
+    	ArrayList<ClusteredMention> mentions = new ArrayList<ClusteredMention>(); // result
+        
+        HashMap<String, Entity> mentionHeadPair = new HashMap<String, Entity>(); // header pair from training set
+        HashMap<String, Entity> head2Entity = new HashMap<String, Entity>(); // direct match by head
 
     	for (Mention m1 : doc.getMentions()) {
-            boolean findPair = false;
-            for (Mention m2 : doc.getMentions()) {
-                String key = getKeyFromMentionPair(m1, m2);
-                if(handwriten.contains(key)){
-                    findPair = true;
-                    break;
-                }
-            }
             String token1 = m1.headToken().word();
-            if(token2Entity.containsKey(token1)){
-                // System.out.print(token1);
-                mentions.add(m1.markCoreferent(token2Entity.get(token1)));
+            // direct match by head
+            if(head2Entity.containsKey(token1)){
+                mentions.add(m1.markCoreferent(head2Entity.get(token1)));
             }
             else{
-                ClusteredMention newCluster = m1.markSingleton();
-                mentions.add(newCluster);
-                token2Entity.put(token1, newCluster.entity);
+                boolean findPair = false;
+                String key = "";
+                for (Mention m2 : doc.getMentions()) {
+                    key = getKeyFromMentionPair(m1, m2);
+                    if(handwriten.contains(key)){
+                        findPair = true;
+                        break;
+                    }
+                }
+                // header pair from training set
+                if(findPair){
+                    if(mentionHeadPair.containsKey(key)){
+                        mentions.add(m1.markCoreferent(mentionHeadPair.get(key)));
+                        head2Entity.put(token1, mentionHeadPair.get(key));
+                    }
+                    else{
+                        ClusteredMention newCluster = m1.markSingleton();
+                        mentions.add(newCluster);
+                        mentionHeadPair.put(key, newCluster.entity);
+                        head2Entity.put(token1, newCluster.entity);
+                    }
+                }
+                else{
+                    ClusteredMention newCluster = m1.markSingleton();
+                    mentions.add(newCluster);
+                    head2Entity.put(token1, newCluster.entity);
+                }
             }
         }
     	return mentions;
