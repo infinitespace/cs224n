@@ -6,81 +6,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.*;
 
-
 import cs224n.coref.ClusteredMention;
 import cs224n.coref.Document;
 import cs224n.coref.*;
 import cs224n.util.Pair;
+import cs224n.util.*;
 
 public class BetterBaseline implements CoreferenceSystem {
 
-	@Override
-	public void train(Collection<Pair<Document, List<Entity>>> trainingData) {
-        handwriten = new HashMap();
-        for(Pair<Document, List<Entity>> pair : trainingData){
-          List<Entity> clusters = pair.getSecond();
-          for(Entity e : clusters){
-            System.out.println(e);
-            for(Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()){
-                String key = getKeyFromMentionPair(mentionPair.getFirst(), mentionPair.getSecond());
-                if(!handwriten.containsKey(key)){
-                    // System.out.println("key:" + key);
-                    handwriten.put(key, e);
-                }
-            }
-          }
-        }
-
-	}
-
-	@Override
-	public List<ClusteredMention> runCoreference(Document doc) {
-
-    	ArrayList<ClusteredMention> mentions = new ArrayList<ClusteredMention>();
-        HashSet<Integer> clusteredMentions = new HashSet();
-
-    	for (Mention m1 : doc.getMentions()) {
-            for (Mention m2 : doc.getMentions()) {
-                if(!m1.equals(m2)){
-                    String key = getKeyFromMentionPair(m1, m2);
-                    if(handwriten.containsKey(key)){
-                        Entity e = handwriten.get(key);
-                        if(!clusteredMentions.contains(m1.hashCode())){
-                            mentions.add(m1.markCoreferent(e));
-                            clusteredMentions.add(m1.hashCode());
-                        }
-                        if(!clusteredMentions.contains(m2.hashCode())){
-                            mentions.add(m2.markCoreferent(e));
-                            clusteredMentions.add(m2.hashCode());
-                        }
-                    }
-                }
-            }
-        }
-
-        // System.out.println(" org " + Integer.toString(doc.getMentions().size()));
-        // System.out.println(" pre " + Integer.toString(clusteredMentions.size()));
-        // for(ClusteredMention m : mentions){
-        //     System.out.println(m.toString());
-        // }
-        
-        for (Mention m : doc.getMentions()) {
-            int hashcode = m.hashCode();
-            if(!clusteredMentions.contains(hashcode)){
-                ClusteredMention newCluster = m.markSingleton();
-                mentions.add(newCluster);
-                clusteredMentions.add(hashcode);
-            }
-        }
-        // System.out.println(" aft " + Integer.toString(clusteredMentions.size()));
-        // for(ClusteredMention m : mentions){
-        //     System.out.println(m.toString());
-        // }
-    	return mentions;
-	}
-
-    private HashMap<String, Entity> handwriten;
-
+    private HashSet<String> handwriten;
     private String getKeyFromMentionPair(Mention m1, Mention m2){
         String token1 = m1.headToken().word();
         String token2 = m2.headToken().word();
@@ -89,4 +23,46 @@ public class BetterBaseline implements CoreferenceSystem {
         return tokens[0] + tokens[1];
     }
 
+	@Override
+	public void train(Collection<Pair<Document, List<Entity>>> trainingData) {
+        handwriten = new HashSet<String>();
+        for(Pair<Document, List<Entity>> pair : trainingData){
+          List<Entity> clusters = pair.getSecond();
+          for(Entity e : clusters){
+            // System.out.println(e);
+            for(Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()){
+                handwriten.add(getKeyFromMentionPair(mentionPair.getFirst(), mentionPair.getSecond()));
+            }
+          }
+        }
+	}
+
+	@Override
+	public List<ClusteredMention> runCoreference(Document doc) {
+
+    	ArrayList<ClusteredMention> mentions = new ArrayList<ClusteredMention>();
+        HashMap<String, Entity> token2Entity = new HashMap<String, Entity>();
+
+    	for (Mention m1 : doc.getMentions()) {
+            boolean findPair = false;
+            for (Mention m2 : doc.getMentions()) {
+                String key = getKeyFromMentionPair(m1, m2);
+                if(handwriten.contains(key)){
+                    findPair = true;
+                    break;
+                }
+            }
+            String token1 = m1.headToken().word();
+            if(token2Entity.containsKey(token1)){
+                // System.out.print(token1);
+                mentions.add(m1.markCoreferent(token2Entity.get(token1)));
+            }
+            else{
+                ClusteredMention newCluster = m1.markSingleton();
+                mentions.add(newCluster);
+                token2Entity.put(token1, newCluster.entity);
+            }
+        }
+    	return mentions;
+	} 
 }

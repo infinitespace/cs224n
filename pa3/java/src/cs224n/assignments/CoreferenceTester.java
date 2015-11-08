@@ -283,7 +283,7 @@ public class CoreferenceTester<SYS extends CoreferenceSystem> {
       for(Entity gold : keys){
         for(Mention mention : gold.mentions){
           if(keyMap.containsKey(mention)){
-            System.out.println(gold);
+            // System.out.println(gold);
             throw new IllegalStateException("Mention mapped to multiple entities (in gold! you're all sorts of broken...): " + mention); 
           }
           keyMap.put(mention, gold);
