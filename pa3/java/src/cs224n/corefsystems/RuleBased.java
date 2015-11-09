@@ -52,17 +52,17 @@ public class RuleBased implements CoreferenceSystem {
         return mentions;
     }
 
-    
     boolean isEqualByRules(Mention m1, Mention m2) {
-       
         if (MentionStringExactMatch(m1, m2)) return true;
         if (HeadExactMatch(m1, m2)) return true;
-        if (GenderNotMatch(m1, m2)) return false;
-        if (NumberNotMatch(m1, m2)) return false;
-        if (PronounMatch(m1, m2)) return true;
-        if (NerTagNotMatch(m1, m2)) return false;
+        if (!GenderMatchOrUnknown(m1, m2)) return false;
+        if (!NumberMatchOrUnknown(m1, m2)) return false;
+        if (Pronoun.isSomePronoun(m2.gloss()) && m1.sentence.equals(m2.sentence)
+                && ((m2.headWordIndex - m1.headWordIndex) > 0) && ((m2.headWordIndex - m1.headWordIndex) < 5))
+            return true;
+        if (!NerTagMatch(m1, m2)) return false;
         if (PronouAndNameMatch(m1, m2)) return true;
-        if (LemmaNotMatch(m1, m2)) return false;
+        if (!LemmaMatch(m1, m2)) return false;
         if (StringSubset(m1, m2)) return true;
         return true;
     }
@@ -75,26 +75,20 @@ public class RuleBased implements CoreferenceSystem {
         return m1.headWord().equals(m2.headWord()) ? true : false;
     }
 
-    boolean GenderNotMatch(Mention m1, Mention m2) {
+    boolean GenderMatchOrUnknown(Mention m1, Mention m2) {
         Pair<Boolean, Boolean> pair = Util.haveGenderAndAreSameGender(m1, m2);
-        if ((pair.getSecond() && pair.getFirst()) || !pair.getFirst()) return false;
-        else return true;
+        if ((pair.getSecond() && pair.getFirst()) || !pair.getFirst()) return true;
+        else return false;
     }
 
-    boolean NumberNotMatch(Mention m1, Mention m2) {
+    boolean NumberMatchOrUnknown(Mention m1, Mention m2) {
         Pair<Boolean, Boolean> pair = Util.haveNumberAndAreSameNumber(m1, m2);
-        if ((pair.getSecond() && pair.getFirst()) || !pair.getFirst()) return false;
-        else return true;
+        if ((pair.getSecond() && pair.getFirst()) || !pair.getFirst()) return true;
+        else return false;
     }
 
-    boolean PronounMatch(Mention m1, Mention m2){
-        return (Pronoun.isSomePronoun(m2.gloss()) && m1.sentence.equals(m2.sentence)
-                && ((m2.headWordIndex - m1.headWordIndex) > 0) 
-                    && ((m2.headWordIndex - m1.headWordIndex) < 4)) ? true : false;
-    }
-
-    boolean NerTagNotMatch(Mention m1, Mention m2) {
-        return m1.headToken().nerTag().equals(m2.headToken().nerTag()) ? false : true;
+    boolean NerTagMatch(Mention m1, Mention m2) {
+        return m1.headToken().nerTag().equals(m2.headToken().nerTag()) ? true : false;
     }
 
     boolean PronouAndNameMatch(Mention m1, Mention m2) {
@@ -112,8 +106,8 @@ public class RuleBased implements CoreferenceSystem {
         return false;
     } 
 
-    boolean LemmaNotMatch(Mention m1, Mention m2) {
-        return m1.headToken().lemma().equals(m2.headToken().lemma()) ? false: true;
+    boolean LemmaMatch(Mention m1, Mention m2) {
+        return m1.headToken().lemma().equals(m2.headToken().lemma()) ? true: false;
     }
 
     boolean StringSubset(Mention m1, Mention m2) {
