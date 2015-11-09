@@ -33,7 +33,15 @@ public class ClassifierBased implements CoreferenceSystem {
 			 * TODO: Create a set of active features
 			 */
 
-			Feature.ExactMatch.class,
+			// Feature.ExactMatch.class,
+			Feature.ExactHeadWordMatch.class,
+			// Feature.IsPronoun.class,
+			 Feature.PronounGenderMatch.class,
+			 Feature.PronounSpeakerMatch.class,
+			 Feature.PronounTypeMatch.class,
+			 Feature.PronounPluralMatch.class,
+			// Feature.DistanceMention.class,
+			// Feature.DistanceSentence.class,
 
 			//skeleton for how to create a pair feature
 			//Pair.make(Feature.IsFeature1.class, Feature.IsFeature2.class),
@@ -57,13 +65,61 @@ public class ClassifierBased implements CoreferenceSystem {
 
 
 			//--Features
-			if(clazz.equals(Feature.ExactMatch.class)){
+			if (clazz.equals(Feature.ExactMatch.class)){
 				//(exact string match)
 				return new Feature.ExactMatch(onPrix.gloss().equals(candidate.gloss()));
-//			} else if(clazz.equals(Feature.NewFeature.class) {
-				/*
-				 * TODO: Add features to return for specific classes. Implement calculating values of features here.
-				 */
+			} else if (clazz.equals(Feature.ExactHeadWordMatch.class)) {
+				return new Feature.ExactHeadWordMatch(onPrix.headWord().equals(candidate.headWord()));
+			} else if (clazz.equals(Feature.IsPronoun.class)) {
+				return new Feature.IsPronoun(Pronoun.isSomePronoun(onPrix.gloss()));
+			} else if (clazz.equals(Feature.PronounGenderMatch.class)) {
+				Pronoun p1 = Pronoun.valueOrNull(onPrix.gloss());
+				Pronoun p2 = Pronoun.valueOrNull(candidate.gloss());
+				if (p1 == null) {
+					return new Feature.PronounGenderMatch(false);
+				} else if (p2 == null) {
+					return new Feature.PronounGenderMatch(false);
+				} else {
+					return new Feature.PronounGenderMatch(p1.gender == p2.gender);
+				}
+			} else if (clazz.equals(Feature.PronounSpeakerMatch.class)) {
+				Pronoun p1 = Pronoun.valueOrNull(onPrix.gloss());
+				Pronoun p2 = Pronoun.valueOrNull(candidate.gloss());
+				if (p1 == null) {
+					return new Feature.PronounSpeakerMatch(false);
+				} else if (p2 == null) {
+					return new Feature.PronounSpeakerMatch(false);
+				} else {
+					return new Feature.PronounSpeakerMatch(p1.speaker == p2.speaker);
+				}
+			} else if (clazz.equals(Feature.PronounTypeMatch.class)) {
+				Pronoun p1 = Pronoun.valueOrNull(onPrix.gloss());
+				Pronoun p2 = Pronoun.valueOrNull(candidate.gloss());
+				if (p1 == null) {
+					return new Feature.PronounTypeMatch(false);
+				} else if (p2 == null) {
+					return new Feature.PronounTypeMatch(false);
+				} else {
+					return new Feature.PronounTypeMatch(p1.type == p2.type);
+				}
+			} else if (clazz.equals(Feature.PronounPluralMatch.class)) {
+				Pronoun p1 = Pronoun.valueOrNull(onPrix.gloss());
+				Pronoun p2 = Pronoun.valueOrNull(candidate.gloss());
+				if (p1 == null) {
+					return new Feature.PronounPluralMatch(false);
+				} else if (p2 == null) {
+					return new Feature.PronounPluralMatch(false);
+				} else {
+					return new Feature.PronounPluralMatch(p1.plural == p2.plural);
+				}
+			} else if (clazz.equals(Feature.DistanceMention.class)) {
+				int pos1 = onPrix.doc.indexOfMention(onPrix);
+				int pos2 = candidate.doc.indexOfMention(candidate);
+				return new Feature.DistanceMention(pos1 - pos2);
+			} else if (clazz.equals(Feature.DistanceSentence.class)) {
+				int pos1 = onPrix.doc.indexOfSentence(onPrix.sentence);
+				int pos2 = candidate.doc.indexOfSentence(candidate.sentence);
+				return new Feature.DistanceSentence(pos1 - pos2);
 			}
 			else {
 				throw new IllegalArgumentException("Unregistered feature: " + clazz);
