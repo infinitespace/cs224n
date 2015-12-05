@@ -221,19 +221,19 @@ public class WindowModel {
 					start_idx++;
 				}
 
-				if (i % 100 == 0) {
-					//System.out.println("iteration: " + iter + " data: " + i);
+				if (i % 10000 == 0) {
+					System.out.println("iteration: " + iter + " data: " + i);
 					monitorLearning(_trainData);
 				}	
 			}
 		}
 	}
 
-	public void test(List<Datum> testData){
+	public void test(List<Datum> testData, String filename){
 		// TODO
 		Writer output = null;
         try {
-            output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("WindowModel.out"), "utf-8"));
+            output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"));
             for (int i = 0; i < testData.size(); i++) {
             	Datum datum = testData.get(i);
             	String word = datum.word;

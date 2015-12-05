@@ -43,6 +43,7 @@ public class NER {
 
 		//TODO: Implement those two functions
 		model.train(trainData);
-		//model.test(testData);
-	    }
+		model.test(trainData, "test_train.out");
+		model.test(testData, "test_test.out");
+	}
 }
