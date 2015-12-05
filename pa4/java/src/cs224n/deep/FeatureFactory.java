@@ -9,6 +9,8 @@ import org.ejml.simple.*;
 
 public class FeatureFactory {	
 
+	public static int STARTEND_TOKEN_CNT = 1;
+
 	private FeatureFactory() {
 
 	}
@@ -30,7 +32,6 @@ public class FeatureFactory {
 	}
 	
 	static int labelIndex = 0;
-	public static int PADDING_LEN = 3;
 	public static HashMap<Integer, String> num2label = new HashMap<Integer, String>();
 	public static HashMap<String, Integer> label2num = new HashMap<String, Integer>(); 
 
@@ -39,15 +40,19 @@ public class FeatureFactory {
 
 		BufferedReader input = new BufferedReader(new FileReader(filename));
 		List<Datum> res = new ArrayList<Datum>();
-	    int paddingLen = PADDING_LEN;
 		
 		String l = input.readLine();
 		while(l != null){
+			if (l.equals("-DOCSTART-\tO")) {
+				// skip the next blank line
+				l = input.readLine();
+				continue;
+			}
 			if (l.trim().length() == 0) {
-				for (int i = 0; i < paddingLen; i++) {
+				for (int i = 0; i < STARTEND_TOKEN_CNT; i++) {
 					res.add(new Datum("</s>", ""));
 				}
-				for (int i = 0; i < paddingLen; i++) {
+				for (int i = 0; i < STARTEND_TOKEN_CNT; i++) {
 					res.add(new Datum("<s>", ""));
 				}
 				l = input.readLine();
@@ -90,21 +95,21 @@ public class FeatureFactory {
 				continue;
 			}
 			String[] all_bits = line.split("\\s+");
-			if (colLen == 0) {
-        		rowLen = 0;
-				colLen = all_bits.length;
+			if (rowLen == 0) {
+        		colLen = 0;
+				rowLen = all_bits.length;
 			} 
-			else if (colLen != all_bits.length){
+			else if (rowLen != all_bits.length){
 				line = input.readLine();
 				continue;
 			}
-			rowLen++;
+			colLen++;
 			line = input.readLine();
 		}
 		
 		input = new BufferedReader(new FileReader(vecFilename));
 		allVecs = new SimpleMatrix(rowLen, colLen);
-   		int row = 0;
+   		int col = 0;
    		line = input.readLine();
    		while(line != null){
    			if (line.length() == 0){
@@ -112,11 +117,11 @@ public class FeatureFactory {
    				continue;
    			}
 			String[] all_bits = line.split("\\s+");
-			if (colLen == all_bits.length) {
-				for (int col = 0; col < colLen; col++) {
-					allVecs.set(row, col, Double.parseDouble(all_bits[col]));
+			if (rowLen == all_bits.length) {
+				for (int row = 0; row < rowLen; row++) {
+					allVecs.set(row, col, Double.parseDouble(all_bits[row]));
 				}
-				row++;
+				col++;
 			}
    			line = input.readLine();
    		}

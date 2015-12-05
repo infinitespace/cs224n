@@ -28,22 +28,22 @@ public class Baseline {
         
         Writer output = null;
         try {
-            output = new BufferedWriter(new OutputStreamWriter( 
-                new FileOutputStream("Baseline.out"), "utf-8")
-            );
+            output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("Baseline.out"), "utf-8"));
             for (Datum datum: test) {
-                if (datum.word!="<s>" && datum.word!="</s>") {
-                    String label = word2label.get(datum.word);
-                    if(label == null) label = "O";
-                    output.write(datum.word + "\t" + datum.label + "\t" + label + "\n");
-                    // System.out.println(datum.word + "\t" + datum.label + "\t" + label + "\n");
+                String word = datum.word;
+                if (word.equals("<s>") || word.equals("</s>")) {
+                    continue;
                 }
+
+                String label = word2label.get(datum.word);
+                if(label == null) label = "O";
+                output.write(datum.word + "\t" + datum.label + "\t" + label + "\n");
+                // System.out.println(datum.word + "\t" + datum.label + "\t" + label + "\n");
             }
-            System.out.println("Finished Baseline");   
+            System.out.println("Finished Baseline");  
+            output.close(); 
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
-        } finally {
-            output.close();
         }
     }   
 }
