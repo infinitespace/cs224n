@@ -221,7 +221,7 @@ public class WindowModel {
 					start_idx++;
 				}
 
-				if (i % 10000 == 0) {
+				if (i % 100000 == 0) {
 					System.out.println("iteration: " + iter + " data: " + i);
 					monitorLearning(_trainData);
 				}	
@@ -230,33 +230,37 @@ public class WindowModel {
 	}
 
 	public void test(List<Datum> testData, String filename){
-		// TODO
 		Writer output = null;
         try {
             output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"));
             for (int i = 0; i < testData.size(); i++) {
-            	Datum datum = testData.get(i);
-            	String word = datum.word;
-            	String label = datum.label;
+	            Datum datum = testData.get(i);
+	            String word = datum.word;
+	            String label = datum.label;
                 if (datum.word.equals("<s>") || datum.word.equals("</s>")) {
-                	continue;
-                }
+					continue;
+		        }
                 SimpleMatrix x = getX(testData, i);
+                SimpleMatrix p = feedForward(x);
                 int maxLabelId = -1;
                 double maxValue = Double.MIN_VALUE;
-                for (int row = 0; row < x.numRows(); row++) {
-                	if (x.get(row, 0) > maxValue) {
-                		maxValue = x.get(row, 0);
-                		maxLabelId = row;
-                	}
-                }
+                for (int row = 0; row < p.numRows(); row++) {
+		                
+					if (p.get(row, 0) > maxValue) {
+					                
+						maxValue = p.get(row, 0);
+						                
+						maxLabelId = row;
+					                
+					}
+		         }
                 String predictedLabel = FeatureFactory.num2label.get(maxLabelId);
                 output.write(datum.word + "\t" + label + "\t" + predictedLabel + "\n");
-                output.close();
-            }  
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        }
+		    }  
+		    output.close();
+	        } catch (IOException ex) {
+	            System.out.println(ex.getMessage());
+	    }
 	}
 
 	/**

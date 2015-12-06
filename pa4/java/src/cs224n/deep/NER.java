@@ -29,14 +29,14 @@ public class NER {
 
 		// initialize model 
 		WindowModel model = new WindowModel();
-		model.window_size = 3;
+		model.window_size = 5;
 		model.word_size = allVecs.numRows();
 		model.hidden_size = 100;
 		model.label_size = 5;
 		model.vocab_size = allVecs.numCols();
 		model.alpha = 0.02;
-		model.lambda = 0.001;
-		model.iteration = 1;
+		model.lambda = 0.00005;
+		model.iteration = 12;
 
 		model.initWeights();
 		model.initLWithProvided(allVecs);
